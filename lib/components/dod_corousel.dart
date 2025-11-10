@@ -22,6 +22,7 @@ class _DodCorouselState extends State<DodCorousel> {
         options: CarouselOptions(
           height: 330,
           viewportFraction: 0.7,
+          clipBehavior: Clip.none,
           onPageChanged: (index, reason) {
             setState(() {
               _currentIndex = index;
