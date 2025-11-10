@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
+import 'package:corousel/product_model.dart';
 
 class DodCard extends StatefulWidget {
   final bool isActive;
   final int currentIndex;
   final int activeIndex;
   final int totalItems;
+  final Product? product;
+  final Function(Product)? onSwipeDown;
 
   const DodCard({
     super.key,
@@ -13,6 +16,8 @@ class DodCard extends StatefulWidget {
     this.currentIndex = 0,
     this.activeIndex = 0,
     this.totalItems = 0,
+    this.product,
+    this.onSwipeDown,
   });
 
   double _getRotationAngle() {
@@ -55,10 +60,27 @@ class _DodCardState extends State<DodCard> with SingleTickerProviderStateMixin {
   }
 
   void _onDragEnd(DragEndDetails details) {
-    final Animation<Offset> animation = Tween<Offset>(begin: _dragOffset, end: Offset.zero)
-        .animate(CurvedAnimation(parent: _animationController, curve: Curves.easeOut));
-    animation.addListener(() => setState(() => _dragOffset = animation.value));
-    _animationController.forward(from: 0);
+    // If dragged down far enough, trigger add to cart
+    if (_dragOffset.dy > 150 && widget.product != null && widget.onSwipeDown != null) {
+      // Animate the card away
+      final Animation<Offset> animation = Tween<Offset>(
+        begin: _dragOffset,
+        end: Offset(0, MediaQuery.of(context).size.height + 200),
+      ).animate(CurvedAnimation(parent: _animationController, curve: Curves.easeIn));
+      animation.addListener(() => setState(() => _dragOffset = animation.value));
+      _animationController.addStatusListener((status) {
+        if (status == AnimationStatus.completed) {
+          widget.onSwipeDown!(widget.product!);
+        }
+      });
+      _animationController.forward(from: 0);
+    } else {
+      // Otherwise, animate back to the original position
+      final Animation<Offset> animation = Tween<Offset>(begin: _dragOffset, end: Offset.zero)
+          .animate(CurvedAnimation(parent: _animationController, curve: Curves.easeOut));
+      animation.addListener(() => setState(() => _dragOffset = animation.value));
+      _animationController.forward(from: 0);
+    }
   }
 
   @override
@@ -120,10 +142,13 @@ class _DodCardState extends State<DodCard> with SingleTickerProviderStateMixin {
                         ),
                       ),
                     ),
-                    const Padding(
-                      padding: EdgeInsets.all(10),
-                      child: Image(
-                        image: AssetImage("lib/assets/images/sample.png"),
+                    Padding(
+                      padding: const EdgeInsets.all(10),
+                      child: Image.asset(
+                        widget.product?.imageAsset ?? "lib/assets/images/sample.png",
+                        errorBuilder: (context, error, stackTrace) {
+                          return const Icon(Icons.image_not_supported, size: 80);
+                        },
                       ),
                     ),
                   ],

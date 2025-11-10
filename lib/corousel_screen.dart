@@ -121,7 +121,7 @@ class _CorouselScreenState extends State<CorouselScreen> {
       body: Container(
         decoration: const BoxDecoration(
           image: DecorationImage(
-            image: AssetImage("assets/images/fetching_cards.png"), // <-- Your image path here
+            image: AssetImage("lib/assets/images/fetching_cards.png"),
             fit: BoxFit.cover,
           ),
         ),
