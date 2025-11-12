@@ -65,7 +65,8 @@ class _DodCardState extends State<DodCard> with SingleTickerProviderStateMixin {
       // Animate the card away
       final Animation<Offset> animation = Tween<Offset>(
         begin: _dragOffset,
-        end: Offset(0, MediaQuery.of(context).size.height + 200),
+        //end: Offset(0, MediaQuery.of(context).size.height + 200),
+        end: Offset(0, 390),
       ).animate(CurvedAnimation(parent: _animationController, curve: Curves.easeIn));
       animation.addListener(() => setState(() => _dragOffset = animation.value));
       _animationController.addStatusListener((status) {
