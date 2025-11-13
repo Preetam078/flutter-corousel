@@ -1,3 +1,6 @@
+import 'dart:math';
+
+import 'package:corousel/components/corousel_builder.dart';
 import 'package:corousel/components/deal_status.dart';
 import 'package:corousel/components/dod_corousel_container.dart';
 import 'package:corousel/components/hero_container.dart';
@@ -9,10 +12,42 @@ class DealOfTheDay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    List<Widget> widgets = List.generate(
+      10,
+      (index) => ClipRRect(
+        borderRadius: const BorderRadius.all(Radius.circular(5.0)),
+        child: Image.asset(
+          "lib/assets/images/sample.png", //Images stored in assets folder
+          fit: BoxFit.fill,
+        ),
+      ),
+    );
+
+    var screenWidth = MediaQuery.of(context).size.width;
+    var screenHeight = MediaQuery.of(context).size.height;
+
     return Scaffold(
       body: Container(
         width: double.infinity,
-        height: double.infinity,
+        // color: Colors.yellow,
+        // //Wrap the OverlappedCarousel widget with SizedBox to fix a height. No need to specify width.
+        // child: SizedBox(
+        //   height: 300,
+        //   child: CorouselBuilder(
+        //     widgets: widgets, //List of widgets
+        //     currentIndex: 2,
+        //     onClicked: (index) {
+        //       ScaffoldMessenger.of(context).showSnackBar(
+        //         SnackBar(
+        //           content: Text("You clicked at $index"),
+        //         ),
+        //       );
+        //     },
+        //     obscure: 0.4,
+        //     skewAngle: 0.1,
+        //   ),
+        // ),
+         height: double.infinity,
         decoration: BoxDecoration(
           image: DecorationImage(
             image: AssetImage("lib/assets/images/fetching_cards.png"),

@@ -1,3 +1,4 @@
+import 'package:corousel/components/custom_corousel.dart';
 import 'package:corousel/components/deal_of_the_day.dart';
 import 'package:corousel/corousel_screen.dart';
 import 'package:flutter/material.dart';
@@ -17,6 +18,7 @@ class MyApp extends StatelessWidget {
           primarySwatch: Colors.blue,
         ),
         home: DealOfTheDay()
+        //home:   CustomCorousel(),
     );
   }
 }

@@ -1,3 +1,4 @@
+import 'package:corousel/components/custom_corousel.dart';
 import 'package:corousel/components/dod_action_info.dart';
 import 'package:corousel/components/dod_cart.dart';
 import 'package:corousel/components/dod_corousel.dart';
@@ -12,7 +13,7 @@ class DodCorouselContainer extends StatefulWidget {
 }
 
 class _DodCorouselContainerState extends State<DodCorouselContainer> {
-  final List<Product> _carouselItems = [
+  List<Product> _carouselItems = [
     Product(
       id: 1,
       name: 'HUBBERHOLME',
@@ -64,11 +65,14 @@ class _DodCorouselContainerState extends State<DodCorouselContainer> {
       }
       // Remove from carousel
       _carouselItems.removeWhere((item) => item.id == product.id);
+      _carouselItems = List.from(_carouselItems);
+      print("getting new Data.......$_carouselItems");
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    print("getting Data.......$_carouselItems");
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [

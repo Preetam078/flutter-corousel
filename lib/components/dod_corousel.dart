@@ -24,8 +24,11 @@ class _DodCorouselState extends State<DodCorousel> {
   @override
   void didUpdateWidget(DodCorousel oldWidget) {
     super.didUpdateWidget(oldWidget);
+    print("didUpdateWidget$oldWidget");
     // Adjust current index if items were removed
     if (widget.items.length != oldWidget.items.length) {
+          print("getting lenghth ${widget.items.length}");
+
       if (_currentIndex >= widget.items.length) {
         _currentIndex = widget.items.length > 0 ? widget.items.length - 1 : 0;
       }
@@ -61,14 +64,19 @@ class _DodCorouselState extends State<DodCorousel> {
       );
     }
 
+    print("getting currentIndex $_currentIndex");
+
     return Container(
       margin: const EdgeInsets.only(bottom: 19),
       child: CarouselSlider.builder(
+        key: ValueKey(widget.items.length),
         carouselController: _carouselController,
         options: CarouselOptions(
+          enableInfiniteScroll: false,
           height: 330,
           viewportFraction: 0.7,
           clipBehavior: Clip.none,
+          
           onPageChanged: (index, reason) {
             setState(() {
               _currentIndex = index;
