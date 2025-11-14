@@ -1,7 +1,6 @@
 import 'package:corousel/components/custom_corousel.dart';
 import 'package:corousel/components/dod_action_info.dart';
 import 'package:corousel/components/dod_cart.dart';
-import 'package:corousel/components/dod_corousel.dart';
 import 'package:corousel/product_model.dart';
 import 'package:flutter/material.dart';
 
@@ -57,19 +56,6 @@ class _DodCorouselContainerState extends State<DodCorouselContainer> {
   ];
   List<Product> _cartItems = [];
 
-  void _onSwipeDown(Product product) {
-    setState(() {
-      // Add to cart
-      if (!_cartItems.any((item) => item.id == product.id)) {
-        _cartItems.add(product);
-      }
-      // Remove from carousel
-      _carouselItems.removeWhere((item) => item.id == product.id);
-      _carouselItems = List.from(_carouselItems);
-      print("getting new Data.......$_carouselItems");
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     print("getting Data.......$_carouselItems");
@@ -81,11 +67,13 @@ class _DodCorouselContainerState extends State<DodCorouselContainer> {
           children: [
             DodActionInfo(),
             Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                DodCorousel(
-                  items: _carouselItems,
-                  onSwipeDown: _onSwipeDown,
-                ),
+                CarouselDemo(),
+                // DodCorousel(
+                //   items: _carouselItems,
+                //   onSwipeDown: _onSwipeDown,
+                // ),
                 const SizedBox(height: 60),
               ],
             ),

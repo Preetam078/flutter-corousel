@@ -20,22 +20,6 @@ class DodCardV2 extends StatefulWidget {
     this.onSwipeDown,
   });
 
-  double _getRotationAngle() {
-    if (isActive) return 0;
-    if (currentIndex == totalItems - 1) {
-      if (activeIndex == 0) {
-        return -0.07;
-      } else {
-        return 0.09;
-      }
-    }
-    if (currentIndex == (activeIndex - 1)) {
-      return -0.07;
-    } else {
-      return 0.09;
-    }
-  }
-
   @override
   State<DodCardV2> createState() => _DodCardState();
 }

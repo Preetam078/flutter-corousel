@@ -20,78 +20,135 @@ class DodCorousel extends StatefulWidget {
 class _DodCorouselState extends State<DodCorousel> {
   int _currentIndex = 0;
   final CarouselSliderController _carouselController = CarouselSliderController();
+  
+  // Track items locally for AnimatedList
+  late List<Product> _displayedItems;
+  bool _isRemoving = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _displayedItems = List.from(widget.items);
+  }
 
   @override
   void didUpdateWidget(DodCorousel oldWidget) {
     super.didUpdateWidget(oldWidget);
-    print("didUpdateWidget$oldWidget");
-    // Adjust current index if items were removed
-    if (widget.items.length != oldWidget.items.length) {
-          print("getting lenghth ${widget.items.length}");
+    
+    // Check if an item was removed
+    if (widget.items.length < oldWidget.items.length && !_isRemoving) {
+      _handleItemRemoval(oldWidget.items);
+    } else if (widget.items.length != _displayedItems.length) {
+      // Sync with parent if items changed externally
+      setState(() {
+        _displayedItems = List.from(widget.items);
+      });
+    }
+  }
 
-      if (_currentIndex >= widget.items.length) {
-        _currentIndex = widget.items.length > 0 ? widget.items.length - 1 : 0;
-      }
-      // Animate to new position if needed
-      if (widget.items.isNotEmpty) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          try {
-            _carouselController.animateToPage(
-              _currentIndex,
-              duration: const Duration(milliseconds: 300),
-              curve: Curves.easeOut,
-            );
-          } catch (e) {
-            // Controller might not be ready yet
-          }
-        });
+  void _handleItemRemoval(List<Product> oldItems) async {
+    _isRemoving = true;
+    
+    // Find which item was removed
+    final removedItem = oldItems.firstWhere(
+      (item) => !widget.items.contains(item),
+      orElse: () => oldItems[_currentIndex],
+    );
+    
+    final removedIndex = _displayedItems.indexWhere((item) => item.id == removedItem.id);
+    
+    if (removedIndex == -1) {
+      _isRemoving = false;
+      return;
+    }
+
+    // Remove from displayed items
+    _displayedItems.removeAt(removedIndex);
+
+    // Adjust current index
+    if (_currentIndex >= _displayedItems.length && _displayedItems.isNotEmpty) {
+      _currentIndex = _displayedItems.length - 1;
+    } else if (_displayedItems.isEmpty) {
+      _currentIndex = 0;
+    }
+
+    // Animate to new position after removal
+    if (_displayedItems.isNotEmpty) {
+      await Future.delayed(const Duration(milliseconds: 100));
+      try {
+        _carouselController.animateToPage(
+          _currentIndex,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
+      } catch (e) {
+        // Controller might not be ready
       }
     }
+
+    setState(() {});
+    
+    await Future.delayed(const Duration(milliseconds: 400));
+    _isRemoving = false;
   }
 
   @override
   Widget build(BuildContext context) {
-    if (widget.items.isEmpty) {
+    if (_displayedItems.isEmpty) {
       return Container(
         margin: const EdgeInsets.only(bottom: 19),
         height: 330,
         child: const Center(
           child: Text(
             'No more items',
-            style: TextStyle(color: Colors.white70),
+            style: TextStyle(
+              color: Colors.white70,
+              fontSize: 18,
+              fontWeight: FontWeight.w500,
+            ),
           ),
         ),
       );
     }
 
-    print("getting currentIndex $_currentIndex");
-
     return Container(
       margin: const EdgeInsets.only(bottom: 19),
       child: CarouselSlider.builder(
-        key: ValueKey(widget.items.length),
+        key: ValueKey(_displayedItems.length),
         carouselController: _carouselController,
         options: CarouselOptions(
           enableInfiniteScroll: false,
           height: 330,
           viewportFraction: 0.7,
           clipBehavior: Clip.none,
-          
           onPageChanged: (index, reason) {
             setState(() {
               _currentIndex = index;
             });
           },
         ),
-        itemCount: widget.items.length,
+        itemCount: _displayedItems.length,
         itemBuilder: (context, index, realIndex) {
-          return DodCard(
-            isActive: index == _currentIndex,
-            currentIndex: index,
-            activeIndex: _currentIndex,
-            totalItems: widget.items.length,
-            product: widget.items[index],
-            onSwipeDown: widget.onSwipeDown,
+          return AnimatedSwitcher(
+            duration: const Duration(milliseconds: 400),
+            transitionBuilder: (child, animation) {
+              return FadeTransition(
+                opacity: animation,
+                child: ScaleTransition(
+                  scale: animation,
+                  child: child,
+                ),
+              );
+            },
+            child: DodCard(
+              key: ValueKey(_displayedItems[index].id),
+              isActive: index == _currentIndex,
+              currentIndex: index,
+              activeIndex: _currentIndex,
+              totalItems: _displayedItems.length,
+              product: _displayedItems[index],
+              onSwipeDown: widget.onSwipeDown,
+            ),
           );
         },
       ),

@@ -86,6 +86,7 @@ class _DodCardState extends State<DodCard> with SingleTickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
+    print("geytinf id...$context");
     return Transform.translate(
       offset: _dragOffset,
       child: GestureDetector(
