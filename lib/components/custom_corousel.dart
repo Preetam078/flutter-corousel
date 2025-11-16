@@ -63,7 +63,7 @@ class _CarouselDemoState extends State<CarouselDemo> {
     // Center the first item after the first frame
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted && items.isNotEmpty) {
-        _snapToCenter(0);
+        _snapToCenter(1);
       }
     });
   }
@@ -206,7 +206,7 @@ void removeItem(int index) async {
               child: Container(
                 width: 160,
                 decoration: BoxDecoration(
-                  color: Colors.blue,
+                  color: isActive ? Colors.blue : Colors.amber,
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
