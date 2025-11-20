@@ -89,15 +89,19 @@ class _CorouselScreenState extends State<CorouselScreen> {
       // 1. Get the index of the product about to be removed.
       final int removedIndex = _carouselItems.indexWhere((item) => item.id == product.id);
       
+      // Check if this is the last item in the carousel
+      final bool isLastItem = removedIndex == _carouselItems.length - 1;
 
       // 2. Remove the item from the carousel list.
       _carouselItems.removeWhere((item) => item.id == product.id);
       
       // 3. Update the PageView position only if items remain.
       if (_carouselItems.isNotEmpty) {
-        final int newIndex = removedIndex - 1;
+        // If it was the last item, animate to the previous item (reverse direction)
+        // Otherwise, stay at the same index (which now contains the next item)
+        final int newIndex = isLastItem ? removedIndex - 1 : removedIndex;
         // Update the state variable
-        _currentPage = removedIndex - 1;
+        _currentPage = newIndex;
 
         // 4. Smoothly animate the PageView to the new index.
         WidgetsBinding.instance.addPostFrameCallback((_) {
