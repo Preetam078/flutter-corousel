@@ -159,6 +159,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     onPullDown: _handlePullDown,
                     gapAnimation: _gapController,
                     removedIndex: _removedIndex,
+                    totalCountBeforeRemoval: _removedIndex != -1 ? _items.length + 1 : 0,
                   ),
                 ),
                 const Spacer(),

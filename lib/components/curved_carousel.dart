@@ -10,6 +10,7 @@ class CurvedCarousel extends StatefulWidget {
   final Set<String> hiddenItems;
   final Animation<double>? gapAnimation;
   final int removedIndex;
+  final int totalCountBeforeRemoval;
 
   const CurvedCarousel({
     Key? key,
@@ -19,6 +20,7 @@ class CurvedCarousel extends StatefulWidget {
     this.hiddenItems = const {},
     this.gapAnimation,
     this.removedIndex = -1,
+    this.totalCountBeforeRemoval = 0,
   }) : super(key: key);
 
   @override
@@ -68,12 +70,16 @@ class _CurvedCarouselState extends State<CurvedCarousel> {
         // Left card (negative relativePosition) -> tilt left? or right?
         // Usually side cards tilt outwards.
         // Let's try a small angle proportional to distance.
-        double rotationAngle = relativePosition * 0.10; // approx 3 degrees per unit
+        // When only one item is left, rotation should be 0
+        double rotationAngle = widget.items.length == 1 ? 0.0 : relativePosition * 0.10; // approx 3 degrees per unit
 
+        // When only one item is left, it should always be draggable
+        bool isCurrent = widget.items.length == 1 || index == _currentPage.round();
+        
         Widget child = DraggableCarouselCard(
             key: ValueKey(item.id),
             item: item,
-            isCurrent: index == _currentPage.round(),
+            isCurrent: isCurrent,
             onPulledDown: (offset) => widget.onPullDown(item, offset),
           );
           
@@ -84,8 +90,10 @@ class _CurvedCarouselState extends State<CurvedCarousel> {
         );
 
         // Apply gap closing animation
-        // Items that are at or after the removed index need to slide in from the right.
-        // Items before the removed index need to slide in from the left (backwards animation).
+        // Logic:
+        // - If removing the LAST item: items before it slide backward (left to right)
+        // - If removing a MIDDLE item (excluding first and last): no animation
+        // - If removing the FIRST item: items after it slide forward (right to left)
         if (widget.gapAnimation != null && widget.removedIndex != -1) {
           return AnimatedBuilder(
             animation: widget.gapAnimation!,
@@ -96,15 +104,23 @@ class _CurvedCarouselState extends State<CurvedCarousel> {
               final curvedValue = Curves.easeOutCubic.transform(widget.gapAnimation!.value);
               double offset = 0.0;
               
-              if (index >= widget.removedIndex) {
-                // Items after removed index: slide from right to left
-                // Animation goes from 0.0 -> 1.0, offset goes from +width -> 0
-                offset = width * (1.0 - curvedValue);
-              } else {
-                // Items before removed index: slide from left to right (backwards)
+              // Check if we removed the last item
+              bool removedLastItem = widget.totalCountBeforeRemoval > 0 && 
+                                     widget.removedIndex == widget.totalCountBeforeRemoval - 1;
+              
+              // Check if we removed the first item
+              bool removedFirstItem = widget.removedIndex == 0;
+              
+              if (removedLastItem && index < widget.removedIndex) {
+                // Removed the last item: items before it slide backward (left to right)
                 // Animation goes from 0.0 -> 1.0, offset goes from -width -> 0
                 offset = -width * (1.0 - curvedValue);
+              } else if ((removedFirstItem || (!removedLastItem && index >= widget.removedIndex))) {
+                // Removed first item OR middle item: items after it slide forward (right to left)
+                // Animation goes from 0.0 -> 1.0, offset goes from +width -> 0
+                offset = width * (1.0 - curvedValue);
               }
+              // Items before removed index (when removing middle item): no animation (offset stays 0)
               
               return Transform.translate(
                 offset: Offset(offset, verticalOffset),
